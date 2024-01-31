@@ -1,7 +1,7 @@
 <?php
 $servername = "localhost";
 $username = "root";
-$password = 'P@$$ion@123';
+$password = '';
 $database = "site";
 
 $conn = mysqli_connect($servername, $username, $password, $database);
@@ -15,7 +15,7 @@ $errorUpload = false;
 
 // Process form data
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $yid = isset($_POST["uid"]) ? mysqli_real_escape_string($conn, $_POST["uid"]) : "";
+    $yid = isset($_POST["uid"]) ? mysqli_real_escape_string($conn, $_POST["uid"]) : "1";
     $name = mysqli_real_escape_string($conn, $_POST["name"]);
     $mobile = mysqli_real_escape_string($conn, $_POST["mobile"]);
 
@@ -41,15 +41,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (!$errorUpload) {
         // Proceed with the SQL query and other logic
-        $sql = "INSERT INTO iddata (yid, name, mobile_no, karyakshetra, bloodgroup, dob, aadhar, photo, aadhar_front, aadhar_back, voting_front, voting_back) VALUES ('$yid', '$name', '$mobile', '$karyakshetraValue', '$bloodgroup', '$dob', '$aadhar', '$photoPath', '$aadharFrontPath', '$aadharBackPath', '$votingFrontPath', '$votingBackPath')";
+        $sql = "INSERT INTO iddata (uid, name, mobile_no, karyakshetra, bloodgroup, dob, aadhar, photo, aadhar_front, aadhar_back, voting_front, voting_back) VALUES ('$yid', '$name', '$mobile', '$karyakshetraValue', '$bloodgroup', '$dob', '$aadhar', '$photoPath', '$aadharFrontPath', '$aadharBackPath', '$votingFrontPath', '$votingBackPath')";
         if (mysqli_query($conn, $sql)) {
             $successMessage = "आपण योजनादूत ओळखपत्रासाठी यशस्वीरित्या नोंदणी केली आहे. लवकरच आपल्याला आपले ओळखपत्र प्राप्त होईल";
+            $response = array("success" => true, "message" => $successMessage);
         } else {
-            echo "कृपया पुन्हा प्रयत्न करा: " . mysqli_error($conn);
+            $errorMessage = "कृपया अपलोड संबंधित त्रुटीत सुधार करा!.";
+            $response = array("success" => false, "message" => $errorMessage);
         }
     } else {
-        echo "कृपया अपलोड संबंधित त्रुटीत सुधार करा.";
+        $errorMessage = "कृपया अपलोड संबंधित त्रुटीत सुधार करा!!!.";
+        $response = array("success" => false, "message" => $errorMessage);
     }
+
+    header('Content-Type: application/json');
+    echo json_encode($response);
 }
 
 function uploadFile($fileInputName, $targetDir, $userName)
@@ -117,58 +123,5 @@ function uploadFile($fileInputName, $targetDir, $userName)
 }
 
 
-mysqli_close($conn);
+mysqli_close($conn)
 ?>
-
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Store and Success</title>
-    <style>
-        body {
-            background: linear-gradient(rgba(255, 165, 0, 0.8), rgba(255, 69, 0, 0.8)), url('your-background-image.jpg');
-            background-size: cover;
-            margin: 0;
-            padding: 0;
-            color: black;
-            font-family: Arial, sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
-
-        .success-container {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-        }
-
-        .go-to-home-button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="success-container">
-        <?php echo $successMessage; ?>
-        <a href="index.php" class="go-to-home-button">Go to Homepage</a>
-    </div>
-</body>
-
-</html>

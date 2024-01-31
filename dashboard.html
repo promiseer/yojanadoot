@@ -175,6 +175,7 @@
         #aadhar::placeholder {
             color: black;
         }
+
         #gavacheNaav::placeholder {
             color: black;
         }
@@ -212,14 +213,18 @@
             width: 100%;
             height: 100%;
         }
+
         input[type="checkbox"] {
-        transform: scale(1.5); 
-        margin-right: 5px;
+            transform: scale(1.5);
+            margin-right: 5px;
         }
+
         .checkbox-label span[style="color: blue;"] {
-         text-decoration: underline; /* Add underline to the text */
-         color: blue; /* Set the text color to blue */
-}
+            text-decoration: underline;
+            /* Add underline to the text */
+            color: blue;
+            /* Set the text color to blue */
+        }
 
 
         @keyframes spin {
@@ -239,18 +244,17 @@
         }
     </style>
     <script>
-    function openTermsAndConditions() {
-        if (document.getElementById("acceptTerms").checked) {
-            window.location.href = "termsandcondition.html";
+        function openTermsAndConditions() {
+            if (document.getElementById("acceptTerms").checked) {
+                window.location.href = "termsandcondition.html";
+            }
         }
-    }
-         
         function showPreview() {
             console.log('showPreview function called', mobile);
-            var acceptTermsCheckbox =true;
+            var acceptTermsCheckbox = true;
             var previewSection = document.getElementById("previewSection");
 
-            if (acceptTermsCheckbox.checked) {
+            if (acceptTermsCheckbox) {
                 // Checkbox is checked, proceed to show preview
 
                 // Retrieve values from form fields 
@@ -266,22 +270,22 @@
                 document.getElementById("previewBloodgroup").innerText = "रक्तगट: " + bloodgroup;
                 document.getElementById("previewDob").innerText = "जन्म दिनांक: " + dob;
                 document.getElementById("previewAadhar").innerText = "आधार कार्ड क्रमांक: " + aadhar;
-
                 // Display uploaded images in the preview section
                 var aadharFrontImg = document.getElementById("aadharFront");
                 var aadharBackImg = document.getElementById("aadharBack");
                 var votingFrontImg = document.getElementById("votingFront");
                 var votingBackImg = document.getElementById("votingBack");
-
                 var uploadedImagesContainer = document.getElementById("uploadedImages");
                 uploadedImagesContainer.innerHTML = ""; // Clear existing images
 
                 function displayImage(fileInput) {
-                    if (fileInput.files.length > 0) {
+                    if (fileInput?.files.length > 0) {
 
                         var previewImage = document.createElement("img");
                         previewImage.src = URL.createObjectURL(fileInput.files[0]);
                         uploadedImagesContainer.appendChild(previewImage);
+                    } else {
+                        console.log("files not uploaded!")
                     }
                 }
                 if (profileImage.length) {
@@ -312,8 +316,64 @@
                 input.value = formattedValue.slice(0, 14);
             }
         }
+        function submitForm() {
+            var aadharFrontImg = document.getElementById("aadharFront").files;
+            var aadharBackImg = document.getElementById("aadharBack").files;
+            var votingFrontImg = document.getElementById("votingFront").files;
+            var votingBackImg = document.getElementById("votingBack").files;
+            var name = document.getElementById("name").value;
+            var mobile = document.getElementById("mobile").value;
+            var bloodgroup = document.getElementById("bloodgroup").value;
+            var dob = document.getElementById("dob").value;
+            var aadhar = document.getElementById("aadhar").value;
+            if (profileImage.length || aadharBackImg.length || aadharBackImg.length || votingBackImg.length || votingFrontImg.length) {
+                var formData = new FormData();
+                console.log(name, mobile, bloodgroup, dob, aadhar)
+                formData.append("name", name);
+                formData.append("mobile", mobile);
+                formData.append("bloodgroup", bloodgroup);
+                formData.append("dob", dob);
+                formData.append("aadhar", aadhar);
+
+                /* images */
+                formData.append("photo", profileImage[0]);
+                formData.append("aadharFront", aadharFrontImg[0]);
+                formData.append("aadharBack", aadharBackImg[0]);
+                formData.append("votingFront", votingFrontImg[0]);
+                formData.append("votingBack", votingBackImg[0]);
+                console.log(formData)
+                fetch('store.php', {
+                    method: 'POST',
+                    body: formData,
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json(); // Assuming your PHP returns JSON
+                        } else {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                    })
+                    .then(response => {
+                        console.log('Upload success:', response);
+                        window.location.href = `success.html?message=${response.message}`;
+
+                    })
+                    .catch(error => {
+                        console.error('Upload error:', error);
+                        // Handle error
+                    });
+
+
+
+            }
+
+        }
     </script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" />
 
     <script src="faceDetection.js" defer></script>
@@ -325,18 +385,24 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-8">
-                <form action="store.php" method="POST" enctype="multipart/form-data" class="needs-validation">
+                <form method="POST" enctype="multipart/form-data" class="needs-validation">
                     <div class="form-group-row m-3">
                         <label for="photo">स्वत:चा फोटो: </label>
                         <div class="form-row mb-3">
-                            <input type="file" class="form-control-m my-2 w-30" id="photo" name="photo" label="upload" accept="image/*">
-                            <button id="webcamButton" type="button" class="webcamButton btn btn-secondary btn-m my-2 w-100" data-bs-toggle="modal" data-bs-target="#exampleModal"> <i class="bi bi-camera"></i> कॅमेरा</button>
+                            <input type="file" class="form-control-m my-2 w-30" id="photo" name="photo" label="upload"
+                                accept="image/*">
+                            <button id="webcamButton" type="button"
+                                class="webcamButton btn btn-secondary btn-m my-2 w-100" data-bs-toggle="modal"
+                                data-bs-target="#exampleModal"> <i class="bi bi-camera"></i> कॅमेरा</button>
                         </div>
                         <div class="form-row align-items-center justify-content-center">
-                            <div class="image-area m-4"><img id="imagePreview" src="#" alt="" class="img-fluid rounded shadow-sm mx-auto w-50 h-30"></div>
+                            <div class="image-area m-4"><img id="imagePreview" src="#" alt=""
+                                    class="img-fluid rounded shadow-sm mx-auto w-50 h-30"></div>
                         </div>
-                        <button type="button" id="uploadPhoto" class="btn btn-primary w-100"> <i class="bi bi-upload"></i> अपलोड करा</button>
-                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <button type="button" id="uploadPhoto" class="btn btn-primary w-100"> <i
+                                class="bi bi-upload"></i> अपलोड करा</button>
+                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                            aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered">
                                 <div class="modal-content">
                                     <div class="modal-body">
@@ -346,7 +412,8 @@
                                         <div class="loader" id="loader"></div>
                                     </div>
                                     <div class="modal-footer justify-content-center">
-                                        <button type="button" class="btn btn-danger " data-bs-dismiss="modal" id="closePopup">Close</button>
+                                        <button type="button" class="btn btn-danger " data-bs-dismiss="modal"
+                                            id="closePopup">Close</button>
                                         <button type="button" class="btn btn-primary" id="capture">Capture</button>
                                         <button type="button" class="btn btn-success" id="save" disabled>save</button>
                                     </div>
@@ -356,15 +423,16 @@
                     </div>
                     <div class="form-group-row mb-3">
                         <label class="form-label" for="name">नाव:</label>
-                        <input type="text" id="name" class="form-control-m" name="name" placeholder="संपूर्ण नाव" required>
+                        <input type="text" id="name" class="form-control-m" name="name" placeholder="संपूर्ण नाव">
                     </div>
                     <div class="form-group-row mb-3">
                         <label for="mobile">&#9743; मोबाईल क्रमांक:</label>
-                        <input required class="form-control-m" type="tel" id="mobile" name="mobile" placeholder="मोबाईल क्रमांक">
+                        <input class="form-control-m" type="tel" id="mobile" name="mobile" placeholder="मोबाईल क्रमांक">
                     </div>
                     <div class="form-group-row mb-3">
                         <label for="gavacheNaav">गावाचे नाव:</label>
-                        <input type="text" id="gavacheNaav" class="form-control-m" name="gavacheNaav" placeholder="गावाचे नाव">
+                        <input type="text" id="gavacheNaav" class="form-control-m" name="gavacheNaav"
+                            placeholder="गावाचे नाव">
                     </div>
                     <div class="form-group-row mb-3">
                         <label for="bloodgroup">रक्तगट:</label>
@@ -382,30 +450,35 @@
                     </div>
                     <div class="form-group-row mb-3">
                         <label for="dob">
-                            <img src="299092_calendar_icon.ico" alt="Icon" style="width: 16px; height: 16px; margin-right: 8px;">
+                            <img src="299092_calendar_icon.ico" alt="Icon"
+                                style="width: 16px; height: 16px; margin-right: 8px;">
                             जन्म दिनांक :
                         </label>
-                        <input required class="form-control-m" type="date" id="dob" name="dob" placeholder="DD-MM-YYYY" pattern="\d{2}-\d{2}-\d{4}" title="Enter a date in the format DD-MM-YYYY" max="2007-12-31">
+                        <input class="form-control-m" type="date" id="dob" name="dob" placeholder="DD-MM-YYYY"
+                            pattern="\d{2}-\d{2}-\d{4}" title="Enter a date in the format DD-MM-YYYY" max="2007-12-31">
                     </div>
                     <div class="form-group-row mb-3">
                         <label for="aadhar">आधार कार्ड क्रमांक:</label>
-                        <input required class="form-control-m" type="text" id="aadhar" name="aadhar" placeholder="आधार कार्ड क्रमांक" maxlength="14" pattern="[0-9]{4} [0-9]{4} [0-9]{4}" title="Please enter a valid Aadhar card number (12 digits with spaces)" oninput="formatAadhar(this);">
+                        <input class="form-control-m" type="text" id="aadhar" name="aadhar"
+                            placeholder="आधार कार्ड क्रमांक" maxlength="14" pattern="[0-9]{4} [0-9]{4} [0-9]{4}"
+                            title="Please enter a valid Aadhar card number (12 digits with spaces)"
+                            oninput="formatAadhar(this);">
                     </div>
                     <div class="form-group-row mb-3">
                         <label for="aadharFront">आधार कार्ड फोटो अपलोड करा (पुढील बाजू):</label>
-                        <input required class="form-control-m" type="file" id="aadharFront" name="aadharFront" accept="image/*">
+                        <input class="form-control-m" type="file" id="aadharFront" name="aadharFront" accept="image/*">
                     </div>
                     <div class="form-group-row mb-3">
                         <label for="aadharBack">आधार कार्ड फोटो अपलोड करा (मागील बाजू):</label>
-                        <input required class="form-control-m" type="file" id="aadharBack" name="aadharBack" accept="image/*">
+                        <input class="form-control-m" type="file" id="aadharBack" name="aadharBack" accept="image/*">
                     </div>
                     <div class="form-group-row mb-3">
                         <label for="votingFront">मतदान कार्ड फोटो अपलोड करा (पुढील बाजू):</label>
-                        <input required class="form-control-m" type="file" id="votingFront" name="votingFront" accept="image/*">
+                        <input class="form-control-m" type="file" id="votingFront" name="votingFront" accept="image/*">
                     </div>
                     <div class="form-group-row mb-5">
                         <label for="votingBack">मतदान कार्ड फोटो अपलोड करा (मागील बाजू):</label>
-                        <input required class="form-control-m" type="file" id="votingBack" name="votingBack" accept="image/*">
+                        <input class="form-control-m" type="file" id="votingBack" name="votingBack" accept="image/*">
                     </div>
                     <!-- <div class="form-group-row mb-3 checkbox-row">
                         <input type="checkbox" id="acceptTerms" name="acceptTerms" onclick="openTermsAndConditions()">
@@ -427,12 +500,15 @@
                         <p id="previewDob"></p>
                         <p id="previewAadhar"></p>
                         <div id="uploadedImages"></div>
-                        <button type="submit" id="submitBtn">समावेश करा.</button>
+                        <button type="button" id="submitBtn" onclick="submitForm()">समावेश करा.</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
 </body>
+
 </html>
