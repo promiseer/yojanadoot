@@ -54,10 +54,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 function uploadFile($fileInputName, $targetDir, $userName)
 {
+
     if (!isset($_FILES[$fileInputName]) || !is_uploaded_file($_FILES[$fileInputName]["tmp_name"])) {
         // File not uploaded or not available
         return null;
     }
+    if ($_FILES[$fileInputName]=="photo") {
+        echo $_FILES[$fileInputName];
+    };
 
     $originalFileName = basename($_FILES[$fileInputName]["name"]);
     $fileExtension = pathinfo($originalFileName, PATHINFO_EXTENSION);
